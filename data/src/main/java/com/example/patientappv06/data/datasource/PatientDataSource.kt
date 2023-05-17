@@ -3,6 +3,7 @@ package com.example.patientappv06.data.datasource
 import com.example.patientappv06.domain.models.add.AddPatientModel
 import com.example.patientappv06.domain.models.add.AddPatientResponseModel
 import com.example.patientappv06.domain.models.delete.PatientDeleteResponseModel
+import com.example.patientappv06.domain.models.get.GetPatientResponseModel
 import com.example.patientappv06.domain.models.patients.PatientsListModels
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -22,4 +23,7 @@ interface PatientDataSource {
 
     @DELETE("patients/{id}")
     suspend fun deletePatient(@Path("id") id:String):PatientDeleteResponseModel
+
+    @GET("patients/{id}")
+    suspend fun getPatient(@Path("id") id:String):GetPatientResponseModel
 }

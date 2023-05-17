@@ -3,6 +3,8 @@ package com.example.patientappv06.domain.repo
 import com.example.patientappv06.domain.models.add.AddPatientModel
 import com.example.patientappv06.domain.models.add.AddPatientResponseModel
 import com.example.patientappv06.domain.models.delete.PatientDeleteResponseModel
+import com.example.patientappv06.domain.models.get.GetPatientResponseModel
+import com.example.patientappv06.domain.models.patients.PatientDataModel
 import com.example.patientappv06.domain.models.patients.PatientsListModels
 
 interface PatientRepo {
@@ -12,4 +14,6 @@ interface PatientRepo {
     suspend fun addPatient(addPatientModel: AddPatientModel): AddPatientResponseModel
 
     suspend fun deletePatient(id:String):PatientDeleteResponseModel
+
+    suspend fun getPatient(id: String):PatientDataModel
 }

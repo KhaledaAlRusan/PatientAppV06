@@ -8,47 +8,42 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.patientappv06.domain.models.patients.PatientDataModel
 import com.example.patientappv06.presentation.databinding.RowPatientBinding
 
-class PatientAdapter(private val onDeletePatient:(id:String) ->Unit) :
+class PatientAdapter(
+    private val onDeletePatient:(id:String) ->Unit,
+    private val onClickItem:(id:String) -> Unit
+) :
     ListAdapter< PatientDataModel, PatientAdapter.PatientViewHolder>(DiffCallback) {
-
     var lastSelected = -1
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PatientViewHolder {
         val binding = RowPatientBinding.inflate(LayoutInflater.from(parent.context),parent,false)
         return PatientViewHolder(binding)
     }
-
     override fun onBindViewHolder(holder: PatientViewHolder, position: Int) {
         val patient =getItem(position)
             holder.bind(patient,position)
     }
-
     inner class PatientViewHolder(private val binding: RowPatientBinding): RecyclerView.ViewHolder(binding.root){
-
         fun bind(model: PatientDataModel, position: Int){
             binding.model = model
 
             binding.cardView.setOnClickListener {
-                if(lastSelected != position){
-
-                    if(lastSelected != -1){
-                        getItem(lastSelected).selected = false
-                        notifyItemChanged(lastSelected)
+                if(position != lastSelected){
+                    // Set the 'selected' property of all items to false
+                    for (i in 0 until itemCount) {
+                        getItem(i)?.selected = false
+                        notifyItemChanged(i)
                     }
-
                     lastSelected = position
-                    getItem(position).selected = true
+                    getItem(position)?.selected = true
                     notifyItemChanged(position)
                 }
+                onClickItem(model.id)
             }
             binding.ivDelete.setOnClickListener {
                 onDeletePatient(model.id)
             }
         }
-
     }
-
-
     private object DiffCallback:DiffUtil.ItemCallback<PatientDataModel>(){
         override fun areItemsTheSame(
             oldItem: PatientDataModel,
@@ -63,8 +58,5 @@ class PatientAdapter(private val onDeletePatient:(id:String) ->Unit) :
         ): Boolean {
             return  oldItem == newItem
         }
-
     }
-
-
 }

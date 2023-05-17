@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -46,7 +47,7 @@ class PatientsFragment : Fragment() {
     }
 
     private fun initAdapter() {
-        adapter = PatientAdapter(::deletePatient)
+        adapter = PatientAdapter(::deletePatient,::onClickItem)
         binding.recycleView.adapter = adapter
     }
 
@@ -115,5 +116,10 @@ class PatientsFragment : Fragment() {
                 viewModel.deletePatient(id)
                 dialog.dismiss()
             }.show()
+    }
+
+
+    fun onClickItem(id: String){
+        findNavController().navigate(R.id.detailsPatientFragment, bundleOf("id" to id))
     }
 }
