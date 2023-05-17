@@ -10,9 +10,12 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.example.patientappv06.domain.models.delete.PatientDeleteResponseModel
+import com.example.patientappv06.domain.models.patients.PatientDataModel
 import com.example.patientappv06.presentation.R
 import com.example.patientappv06.presentation.databinding.FragmentPatientBinding
 import com.example.patientappv06.presentation.features.patients.adapter.PatientAdapter
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -43,7 +46,7 @@ class PatientsFragment : Fragment() {
     }
 
     private fun initAdapter() {
-        adapter = PatientAdapter()
+        adapter = PatientAdapter(::deletePatient)
         binding.recycleView.adapter = adapter
     }
 
@@ -62,25 +65,55 @@ class PatientsFragment : Fragment() {
 
     private fun initObserver() {
         lifecycleScope.launch {
-            viewModel.patientStateFlow.collect{
-                if (it.isNotEmpty()){
-                    adapter.submitList(it)
-                }
-            }
+            viewModel.patientStateFlow.collect(::onPatientsSuccess)
         }
 
         lifecycleScope.launch {
-            viewModel.loadingStateFlow.collect{
-                binding.progressLoading.isVisible = it
-            }
+            viewModel.loadingStateFlow.collect(::onLoadingSuccess)
         }
 
         lifecycleScope.launch {
-            viewModel.errorStateFlow.collect{
-                if(it != null){
-                    Toast.makeText(requireContext(),it.message.toString(),Toast.LENGTH_LONG).show()
-                }
-            }
+            viewModel.errorStateFlow.collect(::onErrorSuccess)
         }
+
+        lifecycleScope.launch {
+            viewModel.deletePatientStateFlow.observe(viewLifecycleOwner,::onDeleteSuccess)
+        }
+    }
+    private fun onPatientsSuccess(response:List<PatientDataModel?>){
+        if(response.isNotEmpty()){
+            adapter.submitList(response)
+        }
+    }
+    private fun onLoadingSuccess(visible:Boolean?){
+        if(visible != null){
+            binding.progressLoading.isVisible = visible
+        }
+    }
+    private fun onErrorSuccess(error:Exception?){
+        if(error != null){
+            Toast.makeText(requireContext(),error.message.toString(),Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun onDeleteSuccess(response:PatientDeleteResponseModel?){
+        if(response != null){
+            Toast.makeText(requireContext(),response.message,Toast.LENGTH_LONG).show()
+            viewModel.getPatients()
+        }
+    }
+
+
+
+    private fun deletePatient(id:String){
+        MaterialAlertDialogBuilder(requireContext())
+            .setMessage("are yous sure do you want delete this item?")
+            .setNegativeButton("no"){dialog, _ ->
+                dialog.dismiss()
+            }
+            .setPositiveButton("yes"){dialog, _ ->
+                viewModel.deletePatient(id)
+                dialog.dismiss()
+            }.show()
     }
 }
